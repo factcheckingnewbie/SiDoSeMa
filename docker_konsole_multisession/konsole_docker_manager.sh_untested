@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+func="${1}"
+profile="${2:-session1}"
+
+# Absolute path for profile dir
+profile_dir="${HOME}/Stuff/Settings/konsole/${profile}"
+container_name="konsole-${profile}"
+
+mkdir -p "${profile_dir}"
+
+function app_start() {
+    docker run --rm -it \
+      --name "${container_name}" \
+      -v /tmp/.X11-unix:/tmp/.X11-unix \
+      -e DISPLAY=$DISPLAY \
+      -v "${profile_dir}:/home/konsoleuser/.config/konsole" \
+      konsole-image
+}
+
+function app_kill()  {
+    docker kill "${container_name}"
+}
+
+main() {
+    if [[ "$func" == "start" ]]; then
+        app_start
+    elif [[ "$func" == "kill" ]]; then
+        app_kill
+    else
+        echo "Unknown function: ${func}" >&2
+    fi
+}
+
+main "$@"
